@@ -1,0 +1,48 @@
+name: ci-ab-report
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test-and-compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Lint
+        run: ruff check src tests
+      - name: Tests
+        run: pytest -q
+      - name: Pipeline complet (données -> train -> simulation A/B -> analyse)
+        run: python run_pipeline.py
+      - uses: iterative/setup-cml@v2
+      - name: Rapport CML dans la PR
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Métriques offline" > report.md
+          python -c "import json;d=json.load(open('reports/offline_metrics.json'));[print(f'- {k}: ndcg@10={v[\"ndcg_at_10\"]:.3f}') for k,v in d.items()]" >> report.md
+          cat reports/ab_report.md >> report.md
+          cml comment create --publish report.md
+  promote:
+    needs: test-and-compare
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt
+      - run: python run_pipeline.py --promote
+      - uses: actions/upload-artifact@v4
+        with:
+          name: champion
+          path: |
+            models/champion.json
+            reports/

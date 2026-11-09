@@ -1,0 +1,103 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python -m src.data
+    deps:
+    - path: src/data.py
+      hash: md5
+      md5: 34d36b88ddb7a0f1e330599730496392
+      size: 2195
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: 7bcd9afcdc9ca1ece6ce96c8f3ad3b55.dir
+      size: 2191710
+      nfiles: 3
+  train:
+    cmd: python -m src.train
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: 7bcd9afcdc9ca1ece6ce96c8f3ad3b55.dir
+      size: 2191710
+      nfiles: 3
+    - path: src/models.py
+      hash: md5
+      md5: c6de864886b96d5a02b3f6c9b74d770a
+      size: 3611
+    - path: src/train.py
+      hash: md5
+      md5: 294724b4fa48cd41db5f6b33b5f4192b
+      size: 2161
+    outs:
+    - path: models
+      hash: md5
+      md5: 2494680af20c15971540f18f5b305602.dir
+      size: 5581657
+      nfiles: 4
+    - path: reports/offline_metrics.json
+      hash: md5
+      md5: d18b84a1a3640850aa2fb7db370630c3
+      size: 801
+  simulate:
+    cmd: python -m src.simulate
+    deps:
+    - path: config/ab_config.json
+      hash: md5
+      md5: 225aba0a13585a7af8e0c069dcc1dd37
+      size: 196
+    - path: data/raw
+      hash: md5
+      md5: 7bcd9afcdc9ca1ece6ce96c8f3ad3b55.dir
+      size: 2191710
+      nfiles: 3
+    - path: models
+      hash: md5
+      md5: 2494680af20c15971540f18f5b305602.dir
+      size: 5581657
+      nfiles: 4
+    - path: src/ab.py
+      hash: md5
+      md5: bba54d960b2eac574fdbaa677c5b1f0c
+      size: 770
+    - path: src/service.py
+      hash: md5
+      md5: eb712412c82c56c5d4439743e6b93b56
+      size: 2823
+    - path: src/simulate.py
+      hash: md5
+      md5: 3b9fc6ab4353d7967079a987a442a0a2
+      size: 2040
+    outs:
+    - path: data/events.jsonl
+      hash: md5
+      md5: 2a0b3bd435defaaac5ed05e348a1cb5a
+      size: 2505208
+  analyze:
+    cmd: python -m src.analyze
+    deps:
+    - path: config/ab_config.json
+      hash: md5
+      md5: 225aba0a13585a7af8e0c069dcc1dd37
+      size: 196
+    - path: data/events.jsonl
+      hash: md5
+      md5: 2a0b3bd435defaaac5ed05e348a1cb5a
+      size: 2505208
+    - path: src/analyze.py
+      hash: md5
+      md5: 8f06416b01edf7aac9a338b80619858e
+      size: 3443
+    outs:
+    - path: reports/ab_report.md
+      hash: md5
+      md5: 52e5eba9a347964108173efb29072001
+      size: 1206
+    - path: reports/ab_result.json
+      hash: md5
+      md5: 38e2781c4f8a33e340f7b02a7f9e311a
+      size: 45
+    - path: reports/ctr.png
+      hash: md5
+      md5: df7544ede0a924aff376420c4f93af7b
+      size: 15928

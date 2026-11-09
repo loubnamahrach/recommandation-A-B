@@ -1,0 +1,39 @@
+stages:
+  prepare:
+    cmd: python -m src.data
+    deps:
+      - src/data.py
+    outs:
+      - data/raw
+  train:
+    cmd: python -m src.train
+    deps:
+      - src/train.py
+      - src/models.py
+      - data/raw
+    outs:
+      - models
+    metrics:
+      - reports/offline_metrics.json:
+          cache: false
+  simulate:
+    cmd: python -m src.simulate
+    deps:
+      - src/simulate.py
+      - src/service.py
+      - src/ab.py
+      - config/ab_config.json
+      - models
+      - data/raw
+    outs:
+      - data/events.jsonl
+  analyze:
+    cmd: python -m src.analyze
+    deps:
+      - src/analyze.py
+      - data/events.jsonl
+      - config/ab_config.json
+    outs:
+      - reports/ab_report.md
+      - reports/ab_result.json
+      - reports/ctr.png
