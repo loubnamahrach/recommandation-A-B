@@ -1,0 +1,12 @@
+{
+  "salt": "p7-exp-1",
+  "control": "popularity",
+  "variants": {
+    "popularity": 0.25,
+    "cf": 0.25,
+    "content": 0.25,
+    "hybrid": 0.25
+  },
+  "min_impressions": 500,
+  "alpha": 0.05
+}
