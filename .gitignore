@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+# Artefacts MLflow locaux et secrets (données/modèles : gérés par DVC via dvc.yaml)
+mlruns/
+mlflow.db
+.env
+dvc_storage/
+/models
